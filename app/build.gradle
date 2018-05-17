@@ -7,7 +7,10 @@ apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "com.raywenderlich.android.twittersnap"
+        
+        def uniqueAppId = "youridhere"
+
+        applicationId "com.raywenderlich.android.twittersnap.$uniqueAppId"
         minSdkVersion 23
         targetSdkVersion 27
         versionCode 1
