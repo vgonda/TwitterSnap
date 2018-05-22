@@ -31,22 +31,81 @@
 
 package com.raywenderlich.android.twittersnap
 
+import android.app.Activity
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Rect
+import android.net.Uri
 import android.os.Bundle
-import android.support.design.widget.Snackbar
+import android.provider.MediaStore
 import android.support.v7.app.AppCompatActivity
+import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.fab
 import kotlinx.android.synthetic.main.activity_main.toolbar
+import kotlinx.android.synthetic.main.content_main.imageView
+import kotlinx.android.synthetic.main.content_main.overlay
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
+
+    private lateinit var presenter: MainActivityPresenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
+        this.presenter = MainActivityPresenter(this)
 
-        fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
+        fab.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            startActivityForResult(intent, 1)
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, imageReturnedIntent: Intent) {
+        super.onActivityResult(requestCode, resultCode, imageReturnedIntent)
+        when (requestCode) {
+            1 -> if (resultCode == Activity.RESULT_OK) {
+                val selectedImageBitmap = resizeImage(imageReturnedIntent.data)
+                imageView.setImageBitmap(selectedImageBitmap)
+                overlay.clear()
+                presenter.runTextRecognition(selectedImageBitmap!!)
+            }
+        }
+    }
+
+    private fun resizeImage(selectedImage: Uri): Bitmap? {
+        return getBitmapFromUri(selectedImage)?.let {
+            val scaleFactor = Math.max(
+                    it.width.toFloat() / imageView.width.toFloat(),
+                    it.height.toFloat() / imageView.height.toFloat())
+
+            Bitmap.createScaledBitmap(it,
+                    (it.width / scaleFactor).toInt(),
+                    (it.height / scaleFactor).toInt(),
+                    true)
+        }
+    }
+
+    private fun getBitmapFromUri(filePath: Uri): Bitmap? {
+        return MediaStore.Images.Media.getBitmap(this.contentResolver, filePath)
+    }
+
+    override fun showHandle(text: String, boundingBox: Rect?) {
+        val textGraphic = TextGraphic(overlay, text, boundingBox)
+        overlay.add(textGraphic)
+//        openTwitterProfile(handle)
+    }
+
+    private fun openTwitterProfile(handle: String) {
+        val url = "https://twitter.com/" + handle.trim().removePrefix("@")
+        val browserIntent = Intent(Intent.ACTION_VIEW,
+                Uri.parse(url))
+        startActivity(browserIntent)
+    }
+
+    override fun showNoTextMessage() {
+        Toast.makeText(this, "No text detected", Toast.LENGTH_LONG).show()
+    }
+
 }
+
