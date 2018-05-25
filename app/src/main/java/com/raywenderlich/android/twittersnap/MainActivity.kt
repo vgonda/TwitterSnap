@@ -59,6 +59,18 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, 1)
         }
+        overlay.setOnTouchListener { _, event ->
+            openTwitterIfProfileClicked(event.x, event.y)
+        }
+    }
+
+    private fun openTwitterIfProfileClicked(x: Float, y: Float): Boolean {
+        return handles.find { it.boundingBox?.contains(x.toInt(), y.toInt()) ?: false }?.let {
+            openTwitterProfile(it.text)
+            true
+        } ?: run {
+            false
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, imageReturnedIntent: Intent) {
@@ -68,6 +80,7 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
                 val selectedImageBitmap = resizeImage(imageReturnedIntent.data)
                 imageView.setImageBitmap(selectedImageBitmap)
                 overlay.clear()
+                handles.clear()
                 presenter.runTextRecognition(selectedImageBitmap!!)
             }
         }
@@ -90,11 +103,12 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
         return MediaStore.Images.Media.getBitmap(this.contentResolver, filePath)
     }
 
+    private val handles = mutableListOf<Handle>()
+
     override fun showHandle(text: String, boundingBox: Rect?) {
-        val textGraphic = TextGraphic(overlay, text, boundingBox)
-        overlay.add(textGraphic)
-//        openTwitterProfile(handle)
+        overlay.add(text, boundingBox)
     }
+
 
     private fun openTwitterProfile(handle: String) {
         val url = "https://twitter.com/" + handle.trim().removePrefix("@")

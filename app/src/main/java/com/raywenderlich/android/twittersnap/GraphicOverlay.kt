@@ -33,6 +33,7 @@ package com.raywenderlich.android.twittersnap
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import java.util.*
@@ -82,11 +83,17 @@ class GraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attr
     /**
      * Adds a graphic to the overlay.
      */
-    fun add(graphic: Graphic) {
+    private fun add(graphic: Graphic) {
         synchronized(lock) {
             graphics.add(graphic)
         }
         postInvalidate()
+    }
+    class Handle(val text: String, val boundingBox: Rect?)
+
+    fun add(text: String, boundingBox: Rect?) {
+        add(TextGraphic(this, text, boundingBox))
+        handles.add(Handle(text, boundingBox))
     }
 
     /**
