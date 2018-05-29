@@ -39,11 +39,13 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.fab
 import kotlinx.android.synthetic.main.activity_main.toolbar
 import kotlinx.android.synthetic.main.content_main.imageView
 import kotlinx.android.synthetic.main.content_main.overlay
+import kotlinx.android.synthetic.main.content_main.progressBar
 
 class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
 
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
 
     private fun setUpCloudSearch(selectedImageBitmap: Bitmap?) {
         fab.setImageResource(R.drawable.ic_cloud_black_24dp)
+        fab.setBackgroundColor(getColor(R.color.colorPrimaryDark))
         fab.setOnClickListener {
             overlay.clear()
             presenter.runCloudTextRecognition(selectedImageBitmap!!)
@@ -112,5 +115,12 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
         Toast.makeText(this, "No text detected", Toast.LENGTH_LONG).show()
     }
 
+    override fun showProgress() {
+        progressBar.visibility = View.VISIBLE
+    }
+
+    override fun hideProgress() {
+        progressBar.visibility = View.GONE
+    }
 }
 

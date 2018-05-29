@@ -42,6 +42,7 @@ import com.google.firebase.ml.vision.text.FirebaseVisionText
 class MainActivityPresenter(val view: View) {
 
     fun runTextRecognition(selectedImage: Bitmap) {
+        view.showProgress()
         val image = FirebaseVisionImage.fromBitmap(selectedImage)
         val detector = FirebaseVision.getInstance().visionTextDetector
         detector.detectInImage(image)
@@ -55,6 +56,7 @@ class MainActivityPresenter(val view: View) {
     }
 
     private fun processTextRecognitionResult(texts: FirebaseVisionText) {
+        view.hideProgress()
         val blocks = texts.blocks
         if (blocks.size == 0) {
             view.showNoTextMessage()
@@ -72,6 +74,7 @@ class MainActivityPresenter(val view: View) {
     }
 
     fun runCloudTextRecognition(selectedImage: Bitmap) {
+        view.showProgress()
         val options = FirebaseVisionCloudDetectorOptions.Builder()
                 .setModelType(FirebaseVisionCloudDetectorOptions.LATEST_MODEL)
                 .setMaxResults(15)
@@ -88,10 +91,10 @@ class MainActivityPresenter(val view: View) {
                 }
     }
 
-    class WordPair(val word: String,
-                   val handle: FirebaseVisionCloudText.Word)
+    class WordPair(val word: String, val handle: FirebaseVisionCloudText.Word)
 
     private fun processCloudTextRecognitionResult(text: FirebaseVisionCloudText?) {
+        view.hideProgress()
         if (text == null) {
             view.showNoTextMessage()
             return
@@ -121,5 +124,7 @@ class MainActivityPresenter(val view: View) {
     interface View {
         fun showNoTextMessage()
         fun showHandle(text: String, boundingBox: Rect?)
+        fun showProgress()
+        fun hideProgress()
     }
 }
