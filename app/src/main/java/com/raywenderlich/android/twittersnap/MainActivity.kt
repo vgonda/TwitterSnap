@@ -108,7 +108,11 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
 
 
     override fun showHandle(text: String, boundingBox: Rect?) {
-        overlay.add(text, boundingBox)
+        overlay.addText(text, boundingBox)
+    }
+
+    override fun showBox(boundingBox: Rect?) {
+        overlay.addBox(boundingBox)
     }
 
     override fun showNoTextMessage() {

@@ -48,19 +48,20 @@ import android.graphics.RectF
 class TextGraphic internal constructor(
         overlay: TwitterGraphicOverlay,
         private val text: String,
-        private val boundingBox: Rect?) :
+        private val boundingBox: Rect?,
+        private val color: Int = Color.BLUE) :
         TwitterGraphicOverlay.Graphic(overlay) {
 
     private val rectPaint: Paint = Paint()
     private val textPaint: Paint
 
     init {
-        rectPaint.color = TEXT_COLOR
+        rectPaint.color = color
         rectPaint.style = Paint.Style.STROKE
         rectPaint.strokeWidth = STROKE_WIDTH
 
         textPaint = Paint()
-        textPaint.color = TEXT_COLOR
+        textPaint.color = color
         textPaint.textSize = TEXT_SIZE
         // Redraw the overlay, as this graphic has been added.
         postInvalidate()
@@ -80,7 +81,6 @@ class TextGraphic internal constructor(
 
     companion object {
 
-        private const val TEXT_COLOR = Color.BLUE
         private const val TEXT_SIZE = 44.0f
         private const val STROKE_WIDTH = 4.0f
     }

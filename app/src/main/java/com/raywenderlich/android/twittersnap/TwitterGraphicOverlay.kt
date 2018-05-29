@@ -34,6 +34,7 @@ package com.raywenderlich.android.twittersnap
 import android.content.Context
 import android.content.Intent
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Rect
 import android.net.Uri
 import android.util.AttributeSet
@@ -117,11 +118,14 @@ class TwitterGraphicOverlay(context: Context, attrs: AttributeSet) : View(contex
     }
     class Handle(val text: String, val boundingBox: Rect?)
 
-    fun add(text: String, boundingBox: Rect?) {
+    fun addText(text: String, boundingBox: Rect?) {
         add(TextGraphic(this, text, boundingBox))
         handles.add(Handle(text, boundingBox))
     }
 
+    fun addBox(boundingBox: Rect?) {
+        add(TextGraphic(this, "", boundingBox, Color.RED))
+    }
     /**
      * Draws the overlay with its associated graphic objects.
      */

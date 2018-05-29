@@ -124,6 +124,7 @@ class MainActivityPresenter(val view: View) {
     interface View {
         fun showNoTextMessage()
         fun showHandle(text: String, boundingBox: Rect?)
+        fun showBox(boundingBox: Rect?)
         fun showProgress()
         fun hideProgress()
     }
