@@ -32,27 +32,53 @@
 package com.raywenderlich.android.twittersnap
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Rect
+import android.net.Uri
 import android.util.AttributeSet
 import android.view.View
 import java.util.*
 
 /**
- * From the ML Kit Google code lab https://codelabs.developers.google.com/codelabs/mlkit-android/#0
+ * Adapted from the ML Kit Google code lab
+ * https://codelabs.developers.google.com/codelabs/mlkit-android/#0
  */
 
-class GraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
+class TwitterGraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
     private val lock = Any()
     private val graphics = HashSet<Graphic>()
+    private val handles = mutableListOf<TwitterGraphicOverlay.Handle>()
+
+    init {
+        setOnTouchListener { _ , event ->
+            openTwitterIfProfileClicked(event.x, event.y)
+        }
+    }
+
+    private fun openTwitterIfProfileClicked(x: Float, y: Float): Boolean {
+        return handles.find { it.boundingBox?.contains(x.toInt(), y.toInt()) ?: false }?.let {
+            openTwitterProfile(it.text)
+            true
+        } ?: run {
+            false
+        }
+    }
+
+    private fun openTwitterProfile(handle: String) {
+        val url = "https://twitter.com/" + handle.trim().removePrefix("@")
+        val browserIntent = Intent(Intent.ACTION_VIEW,
+                Uri.parse(url))
+        context.startActivity(browserIntent)
+    }
 
     /**
      * Base class for a custom graphics object to be rendered within the graphic overlay. Subclass
      * this and implement the [Graphic.draw] method to define the graphics element. Add
-     * instances to the overlay using [GraphicOverlay.add].
+     * instances to the overlay using [TwitterGraphicOverlay.add].
      */
-    abstract class Graphic(private val overlay: GraphicOverlay) {
+    abstract class Graphic(private val overlay: TwitterGraphicOverlay) {
 
         /**
          * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert

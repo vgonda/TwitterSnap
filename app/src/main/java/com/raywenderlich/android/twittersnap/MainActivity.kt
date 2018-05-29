@@ -55,21 +55,13 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
         setSupportActionBar(toolbar)
         this.presenter = MainActivityPresenter(this)
 
+        setUpNewImageListener()
+    }
+
+    private fun setUpNewImageListener() {
         fab.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(intent, 1)
-        }
-        overlay.setOnTouchListener { _, event ->
-            openTwitterIfProfileClicked(event.x, event.y)
-        }
-    }
-
-    private fun openTwitterIfProfileClicked(x: Float, y: Float): Boolean {
-        return handles.find { it.boundingBox?.contains(x.toInt(), y.toInt()) ?: false }?.let {
-            openTwitterProfile(it.text)
-            true
-        } ?: run {
-            false
         }
     }
 
@@ -79,10 +71,18 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
             1 -> if (resultCode == Activity.RESULT_OK) {
                 val selectedImageBitmap = resizeImage(imageReturnedIntent.data)
                 imageView.setImageBitmap(selectedImageBitmap)
+                setUpCloudSearch(selectedImageBitmap)
                 overlay.clear()
-                handles.clear()
                 presenter.runTextRecognition(selectedImageBitmap!!)
             }
+        }
+    }
+
+    private fun setUpCloudSearch(selectedImageBitmap: Bitmap?) {
+        fab.setImageResource(R.drawable.ic_cloud_black_24dp)
+        fab.setOnClickListener {
+            overlay.clear()
+            presenter.runCloudTextRecognition(selectedImageBitmap!!)
         }
     }
 
@@ -103,18 +103,9 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
         return MediaStore.Images.Media.getBitmap(this.contentResolver, filePath)
     }
 
-    private val handles = mutableListOf<Handle>()
 
     override fun showHandle(text: String, boundingBox: Rect?) {
         overlay.add(text, boundingBox)
-    }
-
-
-    private fun openTwitterProfile(handle: String) {
-        val url = "https://twitter.com/" + handle.trim().removePrefix("@")
-        val browserIntent = Intent(Intent.ACTION_VIEW,
-                Uri.parse(url))
-        startActivity(browserIntent)
     }
 
     override fun showNoTextMessage() {

@@ -42,13 +42,14 @@ import android.graphics.RectF
  * Graphic instance for rendering TextBlock position, size, and ID within an associated graphic
  * overlay view.
  *
- * From the ML Kit Google code lab https://codelabs.developers.google.com/codelabs/mlkit-android/#0
+ * Adapted from the ML Kit Google code lab
+ * https://codelabs.developers.google.com/codelabs/mlkit-android/#0
  */
 class TextGraphic internal constructor(
-        overlay: GraphicOverlay,
+        overlay: TwitterGraphicOverlay,
         private val text: String,
         private val boundingBox: Rect?) :
-        GraphicOverlay.Graphic(overlay) {
+        TwitterGraphicOverlay.Graphic(overlay) {
 
     private val rectPaint: Paint = Paint()
     private val textPaint: Paint
@@ -80,7 +81,7 @@ class TextGraphic internal constructor(
     companion object {
 
         private const val TEXT_COLOR = Color.BLUE
-        private const val TEXT_SIZE = 54.0f
+        private const val TEXT_SIZE = 44.0f
         private const val STROKE_WIDTH = 4.0f
     }
 }
