@@ -48,94 +48,96 @@ import java.util.*
 
 class TwitterGraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attrs) {
 
-    private val lock = Any()
-    private val graphics = HashSet<Graphic>()
-    private val handles = mutableListOf<TwitterGraphicOverlay.Handle>()
+  private val lock = Any()
+  private val graphics = HashSet<Graphic>()
+  private val handles = mutableListOf<TwitterGraphicOverlay.Handle>()
 
-    init {
-        setOnTouchListener { _ , event ->
-            openTwitterIfProfileClicked(event.x, event.y)
-        }
+  init {
+    setOnTouchListener { _, event ->
+      openTwitterIfProfileClicked(event.x, event.y)
     }
+  }
 
-    private fun openTwitterIfProfileClicked(x: Float, y: Float): Boolean {
-        return handles.find { it.boundingBox?.contains(x.toInt(), y.toInt()) ?: false }?.let {
-            openTwitterProfile(it.text)
-            true
-        } ?: run {
-            false
-        }
+  private fun openTwitterIfProfileClicked(x: Float, y: Float): Boolean {
+    return handles.find { it.boundingBox?.contains(x.toInt(), y.toInt()) ?: false }?.let {
+      openTwitterProfile(it.text)
+      true
+    } ?: run {
+      false
     }
+  }
 
-    private fun openTwitterProfile(handle: String) {
-        val url = "https://twitter.com/" + handle.trim().removePrefix("@")
-        val browserIntent = Intent(Intent.ACTION_VIEW,
-                Uri.parse(url))
-        context.startActivity(browserIntent)
-    }
+  private fun openTwitterProfile(handle: String) {
+    val url = "https://twitter.com/" + handle.trim().removePrefix("@")
+    val browserIntent = Intent(Intent.ACTION_VIEW,
+        Uri.parse(url))
+    context.startActivity(browserIntent)
+  }
+
+  /**
+   * Base class for a custom graphics object to be rendered within the graphic overlay. Subclass
+   * this and implement the [Graphic.draw] method to define the graphics element. Add
+   * instances to the overlay using [TwitterGraphicOverlay.add].
+   */
+  abstract class Graphic(private val overlay: TwitterGraphicOverlay) {
 
     /**
-     * Base class for a custom graphics object to be rendered within the graphic overlay. Subclass
-     * this and implement the [Graphic.draw] method to define the graphics element. Add
-     * instances to the overlay using [TwitterGraphicOverlay.add].
+     * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert
+     * to view coordinates for the graphics that are drawn:
+     *
+     *
+     *
+     *
+     * @param canvas drawing canvas
      */
-    abstract class Graphic(private val overlay: TwitterGraphicOverlay) {
+    abstract fun draw(canvas: Canvas)
 
-        /**
-         * Draw the graphic on the supplied canvas. Drawing should use the following methods to convert
-         * to view coordinates for the graphics that are drawn:
-         *
-         *
-         *
-         *
-         * @param canvas drawing canvas
-         */
-        abstract fun draw(canvas: Canvas)
-
-        fun postInvalidate() {
-            overlay.postInvalidate()
-        }
+    fun postInvalidate() {
+      overlay.postInvalidate()
     }
+  }
 
-    /**
-     * Removes all graphics from the overlay.
-     */
-    fun clear() {
-        synchronized(lock) {
-            graphics.clear()
-        }
-        postInvalidate()
+  /**
+   * Removes all graphics from the overlay.
+   */
+  fun clear() {
+    synchronized(lock) {
+      graphics.clear()
     }
+    postInvalidate()
+  }
 
-    /**
-     * Adds a graphic to the overlay.
-     */
-    private fun add(graphic: Graphic) {
-        synchronized(lock) {
-            graphics.add(graphic)
-        }
-        postInvalidate()
+  /**
+   * Adds a graphic to the overlay.
+   */
+  private fun add(graphic: Graphic) {
+    synchronized(lock) {
+      graphics.add(graphic)
     }
-    class Handle(val text: String, val boundingBox: Rect?)
+    postInvalidate()
+  }
 
-    fun addText(text: String, boundingBox: Rect?) {
-        add(TextGraphic(this, text, boundingBox))
-        handles.add(Handle(text, boundingBox))
-    }
+  class Handle(val text: String, val boundingBox: Rect?)
 
-    fun addBox(boundingBox: Rect?) {
-        add(TextGraphic(this, "", boundingBox, Color.RED))
-    }
-    /**
-     * Draws the overlay with its associated graphic objects.
-     */
-    override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
+  fun addText(text: String, boundingBox: Rect?) {
+    add(TextGraphic(this, boundingBox))
+    handles.add(Handle(text, boundingBox))
+  }
 
-        synchronized(lock) {
-            for (graphic in graphics) {
-                graphic.draw(canvas)
-            }
-        }
+  fun addBox(boundingBox: Rect?) {
+    add(TextGraphic(this, boundingBox, Color.RED))
+  }
+
+  /**
+   * Draws the overlay with its associated graphic objects.
+   */
+  override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+
+    synchronized(lock) {
+      for (graphic in graphics) {
+        graphic.draw(canvas)
+      }
     }
+  }
 }

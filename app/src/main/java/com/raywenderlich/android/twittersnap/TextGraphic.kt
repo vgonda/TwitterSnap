@@ -32,11 +32,7 @@
 package com.raywenderlich.android.twittersnap
 
 
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
+import android.graphics.*
 
 /**
  * Graphic instance for rendering TextBlock position, size, and ID within an associated graphic
@@ -46,42 +42,37 @@ import android.graphics.RectF
  * https://codelabs.developers.google.com/codelabs/mlkit-android/#0
  */
 class TextGraphic internal constructor(
-        overlay: TwitterGraphicOverlay,
-        private val text: String,
-        private val boundingBox: Rect?,
-        private val color: Int = Color.BLUE) :
-        TwitterGraphicOverlay.Graphic(overlay) {
+    overlay: TwitterGraphicOverlay,
+    private val boundingBox: Rect?,
+    private val color: Int = Color.BLUE) :
+    TwitterGraphicOverlay.Graphic(overlay) {
 
-    private val rectPaint: Paint = Paint()
-    private val textPaint: Paint
+  private val rectPaint: Paint = Paint()
 
-    init {
-        rectPaint.color = color
-        rectPaint.style = Paint.Style.STROKE
-        rectPaint.strokeWidth = STROKE_WIDTH
+  init {
+    rectPaint.color = Color.WHITE
+    rectPaint.style = Paint.Style.STROKE
+    rectPaint.strokeWidth = STROKE_WIDTH + 2
 
-        textPaint = Paint()
-        textPaint.color = color
-        textPaint.textSize = TEXT_SIZE
-        // Redraw the overlay, as this graphic has been added.
-        postInvalidate()
-    }
+    // Redraw the overlay, as this graphic has been added.
+    postInvalidate()
+  }
 
-    /**
-     * Draws the text block annotations for position, size, and raw value on the supplied canvas.
-     */
-    override fun draw(canvas: Canvas) {
-        // Draws the bounding box around the TextBlock.
-        val rect = RectF(boundingBox)
-        canvas.drawRect(rect, rectPaint)
+  /**
+   * Draws the text block annotations for position, size, and raw value on the supplied canvas.
+   */
+  override fun draw(canvas: Canvas) {
+    // Draws the bounding box around the TextBlock.
+    val rect = RectF(boundingBox)
+    canvas.drawRect(rect, rectPaint)
+    rectPaint.color = color
+    rectPaint.style = Paint.Style.STROKE
+    rectPaint.strokeWidth = STROKE_WIDTH
+    canvas.drawRect(rect, rectPaint)
+  }
 
-        // Renders the text at the bottom of the box.
-        canvas.drawText(text, rect.left, rect.bottom, textPaint)
-    }
+  companion object {
 
-    companion object {
-
-        private const val TEXT_SIZE = 44.0f
-        private const val STROKE_WIDTH = 4.0f
-    }
+    private const val STROKE_WIDTH = 4.0f
+  }
 }
