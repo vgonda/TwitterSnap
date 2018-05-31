@@ -8,6 +8,7 @@ android {
   compileSdkVersion 27
   defaultConfig {
 
+//    TODO change the uniqueAppId variable
     def uniqueAppId = "youridhere"
 
     applicationId "com.raywenderlich.android.twittersnap.$uniqueAppId"
