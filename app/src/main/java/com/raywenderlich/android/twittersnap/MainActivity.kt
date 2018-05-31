@@ -64,15 +64,17 @@ class MainActivity : AppCompatActivity(), MainActivityPresenter.View {
     }
   }
 
-  override fun onActivityResult(requestCode: Int, resultCode: Int, imageReturnedIntent: Intent) {
+  override fun onActivityResult(requestCode: Int, resultCode: Int, imageReturnedIntent: Intent?) {
     super.onActivityResult(requestCode, resultCode, imageReturnedIntent)
     when (requestCode) {
       1 -> if (resultCode == Activity.RESULT_OK) {
-        val selectedImageBitmap = resizeImage(imageReturnedIntent.data)
-        imageView.setImageBitmap(selectedImageBitmap)
-        setUpCloudSearch(selectedImageBitmap)
-        overlay.clear()
-        presenter.runTextRecognition(selectedImageBitmap!!)
+        imageReturnedIntent?.data?.let {
+          val selectedImageBitmap = resizeImage(it)
+          imageView.setImageBitmap(selectedImageBitmap)
+          setUpCloudSearch(selectedImageBitmap)
+          overlay.clear()
+          presenter.runTextRecognition(selectedImageBitmap!!)
+        }
       }
     }
   }
